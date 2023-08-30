@@ -1,0 +1,20 @@
+{
+	"name": "2_explore_calendar",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/discovery"
+		},
+		"content": {
+			"query": "-- This is auto-generated code\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://synapseadlk.dfs.core.windows.net/nyc-taxi-data/raw/calendar.csv',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW=TRUE,\n        FIELDTERMINATOR=',',\n        ROWTERMINATOR='\\n'\n    ) AS [result]\n\nEXEC sp_describe_first_result_set N'\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK ''abfss://nyc-taxi-data@synapseadlk.dfs.core.windows.net/raw/calendar.csv'',\n        FORMAT = ''CSV'',\n        PARSER_VERSION = ''2.0'',\n        HEADER_ROW=TRUE\n    ) AS [result]\n'    \n\n\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'abfss://nyc-taxi-data@synapseadlk.dfs.core.windows.net/raw/calendar.csv',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW=TRUE,\n        FIELDTERMINATOR=',',\n        ROWTERMINATOR='\\n'\n    ) \n    WITH (date_key INT,date DATE,year SMALLINT,month SMALLINT,day SMALLINT,\n        day_name varchar(20),day_of_year SMALLINT,week_of_month SMALLINT,\n        week_of_year SMALLINT,month_name VARCHAR(15),year_month INT,year_week INT) \n    \n    AS [result]\n\n\n\n\n\n\n\n\n \n\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'calendar.csv',\n        DATA_SOURCE='nyc_taxi_data_raw',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW=TRUE,\n        FIELDTERMINATOR=',',\n        ROWTERMINATOR='\\n'\n    ) \n    WITH (date_key INT,date DATE,year SMALLINT,month SMALLINT,day SMALLINT,\n        day_name varchar(20),day_of_year SMALLINT,week_of_month SMALLINT,\n        week_of_year SMALLINT,month_name VARCHAR(15),year_month INT,year_week INT) \n    \n    AS [result]",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_discovery",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
