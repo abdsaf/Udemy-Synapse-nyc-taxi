@@ -1,0 +1,20 @@
+{
+	"name": "5_explore_payment_type_json_Array",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/discovery"
+		},
+		"content": {
+			"query": "----------------------------------------------------------------------------------------\n--- Reading Data from JSON file with Array Formate\n\n---{\"payment_type\":4,\"payment_type_desc\":[{\"sub_type\":1, \"value\":\"Dispute\"}]}\n---{\"payment_type\":5,\"payment_type_desc\":[{\"sub_type\":1, \"value\":\"Unknown\"}, {\"sub_type\":2, \"value\":\"Unavailable\"}]}\n---{\"payment_type\":6,\"payment_type_desc\":[{\"sub_type\":1, \"value\":\"Voided trip\"}]}\n----------------------------------------------------------------------------------------    \n--Reading Data from JSON file with Array Formate using open json\n\nselect *\nFROM\n    OPENROWSET(\n        BULK 'payment_type_array.json',\n        DATA_SOURCE='nyc_taxi_data_raw',\n        FORMAT = 'CSV',\n        FIELDTERMINATOR ='0x0b', \n        FIELDQUOTE = '0x0b'\n    ) \n    with (jsondoc NVARCHAR(MAX)) AS [result] \n    CROSS APPLY OPENJSON(jsondoc)\n    with (payment_type TINYINT,payment_type_desc NVARCHAR(MAX) as JSON )\n     CROSS APPLY OPENJSON(payment_type_desc)\n     WITH (Description VARCHAR(25) '$.value');\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_discovery",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

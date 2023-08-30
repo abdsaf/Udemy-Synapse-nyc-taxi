@@ -1,0 +1,20 @@
+{
+	"name": "6_explore_payment_type_json_standard",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/discovery"
+		},
+		"content": {
+			"query": "----------------------------------------------------------------------------------------\n--- Reading Data from standard JSON file \n\n---[{\"rate_code_id\":1,\"rate_code\":\"Standard rate\"}\n---,{\"rate_code_id\":2,\"rate_code\":\"JFK\"}\n---,{\"rate_code_id\":3,\"rate_code\":\"Newark\"}\n---,{\"rate_code_id\":4,\"rate_code\":\"Nassau or Westchester\"}\n---,{\"rate_code_id\":5,\"rate_code\":\"Negotiated fare\"}\n---,{\"rate_code_id\":6,\"rate_code\":\"Group ride\"}\n---]\n---------------------------------------------------------------------------------------- \n\nselect *\nFROM\n    OPENROWSET(\n        BULK 'rate_code.json',\n        DATA_SOURCE='nyc_taxi_data_raw',\n        FORMAT = 'CSV',\n        FIELDTERMINATOR ='0x0b', \n        FIELDQUOTE = '0x0b',\n        ROWTERMINATOR='0x0b'\n    ) \n    with (jsondoc NVARCHAR(MAX)) AS [result] \n    CROSS APPLY OPENJSON(jsondoc)\n    with (rate_code_id TINYINT,rate_code VARCHAR(25) )",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_discovery",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
