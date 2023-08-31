@@ -1,0 +1,20 @@
+{
+	"name": "9_explore_trip_data_green_delta",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/discovery"
+		},
+		"content": {
+			"query": "USE nyc_taxi_discovery\n\nSELECT\n   top 100 *\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_delta/',\n        DATA_SOURCE='nyc_taxi_data_raw',\n        FORMAT = 'delta'\n    ) AS [result]\n\nSELECT\n   top 100 *\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_delta/',\n        DATA_SOURCE='nyc_taxi_data_raw',\n        FORMAT = 'delta'\n    ) AS [result]\n    where year='2020' and month='01'    \n\n\nSELECT\n   top 100 *\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_delta/',\n        DATA_SOURCE='nyc_taxi_data_raw',\n        FORMAT = 'delta'\n    ) \n    with(tip_amount FLOAT,trip_type INT,year varchar(4),month varchar(2))\n    AS [result]    \n\nSELECT\n   count(*)\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_delta/',\n        DATA_SOURCE='nyc_taxi_data_raw',\n        FORMAT = 'delta'\n    ) AS [result]    \n   ",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_discovery",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
