@@ -2,7 +2,7 @@
 	"name": "8_explore_trip_data_green_parquet",
 	"properties": {
 		"content": {
-			"query": "USE nyc_taxi_discovery\n\nSELECT\n    result.filepath(1) as year,\n    result.filepath(2) as month, \n    count(1) as record_count\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_parquet/year=*/month=*/*.parquet',\n        DATA_SOURCE='nyc_taxi_data_raw',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n    where result.filepath(1)=2020\n    and result.filepath(2) in ('01','02','03')\n    group by result.filepath(1),result.filepath(2) \n",
+			"query": "USE nyc_taxi_discovery\n\nSELECT\n    result.filepath(1) as year,\n    result.filepath(2) as month, \n    count(1) as record_count\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_parquet/year=*/month=*/*.parquet',\n        DATA_SOURCE='nyc_taxi_data_raw',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n    where result.filepath(1)=2020\n    and result.filepath(2) in ('01','02','03')\n    group by result.filepath(1),result.filepath(2) \n\n\n    --------------------------------------------------------------------------------------\n\n    SELECT\n    top 100 *\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_parquet/year=*/month=*/*.parquet',\n        DATA_SOURCE='nyc_taxi_data_raw',\n        FORMAT = 'PARQUET'\n    ) WITH(tip_amount FLOAT,trip_type INT) AS [result]\n    where result.filepath(1)=2020\n    and result.filepath(2) in ('01','02','03')\n    \n",
 			"metadata": {
 				"language": "sql"
 			},
