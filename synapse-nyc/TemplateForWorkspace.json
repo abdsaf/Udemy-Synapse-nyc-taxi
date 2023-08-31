@@ -276,8 +276,34 @@
 			"type": "Microsoft.Synapse/workspaces/sqlscripts",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
+				"folder": {
+					"name": "nyc_taxi/discovery"
+				},
 				"content": {
 					"query": "USE nyc_taxi_discovery\n\nSELECT\n    result.filepath(1) as year,\n    result.filepath(2) as month, \n    count(1) as record_count\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_parquet/year=*/month=*/*.parquet',\n        DATA_SOURCE='nyc_taxi_data_raw',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n    where result.filepath(1)=2020\n    and result.filepath(2) in ('01','02','03')\n    group by result.filepath(1),result.filepath(2) \n\n\n    --------------------------------------------------------------------------------------\n\n    SELECT\n    top 100 *\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_parquet/year=*/month=*/*.parquet',\n        DATA_SOURCE='nyc_taxi_data_raw',\n        FORMAT = 'PARQUET'\n    ) WITH(tip_amount FLOAT,trip_type INT) AS [result]\n    where result.filepath(1)=2020\n    and result.filepath(2) in ('01','02','03')\n    \n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "nyc_taxi_discovery",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/9_explore_trip_data_green_delta')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "nyc_taxi/discovery"
+				},
+				"content": {
+					"query": "USE nyc_taxi_discovery\n\nSELECT\n   top 100 *\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_delta/',\n        DATA_SOURCE='nyc_taxi_data_raw',\n        FORMAT = 'delta'\n    ) AS [result]\n\nSELECT\n   top 100 *\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_delta/',\n        DATA_SOURCE='nyc_taxi_data_raw',\n        FORMAT = 'delta'\n    ) AS [result]\n    where year='2020' and month='01'    \n\n\nSELECT\n   top 100 *\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_delta/',\n        DATA_SOURCE='nyc_taxi_data_raw',\n        FORMAT = 'delta'\n    ) \n    with(tip_amount FLOAT,trip_type INT,year varchar(4),month varchar(2))\n    AS [result]    \n\nSELECT\n   count(*)\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_delta/',\n        DATA_SOURCE='nyc_taxi_data_raw',\n        FORMAT = 'delta'\n    ) AS [result]    \n   ",
 					"metadata": {
 						"language": "sql"
 					},
