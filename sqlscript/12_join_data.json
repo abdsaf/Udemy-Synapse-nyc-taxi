@@ -1,0 +1,20 @@
+{
+	"name": "12_join_data",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/discovery"
+		},
+		"content": {
+			"query": " USE nyc_taxi_discovery\n\n SELECT\n    top 100 *\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_parquet/year=2020/month=1/*.parquet',\n        DATA_SOURCE='nyc_taxi_data_raw',\n        FORMAT = 'PARQUET'\n    )  AS [result]\n\n\nselect taxi_zone.Borough,count(1) as number_of_trips\nfrom \n OPENROWSET(\n        BULK 'trip_data_green_parquet/year=2020/month=01/*.parquet',\n        DATA_SOURCE='nyc_taxi_data_raw',\n        FORMAT = 'PARQUET'\n    )  AS trip_data\njoin \nOPENROWSET(\n        BULK 'raw/taxi_zone.csv',\n        DATA_SOURCE='nyc_taxi_data',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW=TRUE,\n        FIELDTERMINATOR=',',\n        ROWTERMINATOR='\\n'\n    ) \n    WITH (LocationID SMALLINT,Borough VARCHAR(255),Zone VARCHAR(255),service_zone VARCHAR(255)) as taxi_zone\n    on trip_data.PULocationID=taxi_zone.LocationID\n    group by taxi_zone.Borough\n\n\n\n    ",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_discovery",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
