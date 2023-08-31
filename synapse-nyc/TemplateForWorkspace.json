@@ -188,7 +188,7 @@
 					"name": "nyc_taxi/ldw"
 				},
 				"content": {
-					"query": "",
+					"query": "USE nyc_taxi_ldw\nGO\n\nCREATE EXTERNAL DATA SOURCE nyc_taxi_src\nWITH (\n    LOCATION = 'https://synapseadlk.dfs.core.windows.net/nyc-taxi-data'\n);\nGO",
 					"metadata": {
 						"language": "sql"
 					},
@@ -404,6 +404,23 @@
 						"poolName": "Built-in"
 					},
 					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/3_create_file_format')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "nyc_taxi/ldw"
+				},
+				"content": {
+					"metadata": {
+						"language": "sql"
+					}
 				},
 				"type": "SqlQuery"
 			},
