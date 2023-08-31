@@ -5,7 +5,7 @@
 			"name": "nyc_taxi/ldw"
 		},
 		"content": {
-			"query": "",
+			"query": "USE Master\nGO\n\nCREATE DATABASE nyc_taxi_ldw\nGO\n\nalter DATABASE nyc_taxi_ldw collate Latin1_General_100_BIN2_UTF8\nGO\n\nUSE nyc_taxi_ldw\nGO\n\nCREATE SCHEMA bronze\nGO\n\nCREATE SCHEMA silver\nGO\n\nCREATE SCHEMA gold\nGO",
 			"metadata": {
 				"language": "sql"
 			},
