@@ -249,6 +249,29 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/7_explore_trip_data_green_csv')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "nyc_taxi/discovery"
+				},
+				"content": {
+					"query": "USE nyc_taxi_discovery\n\nSELECT\n    count(*)\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_csv/year=2020/**',\n        DATA_SOURCE='nyc_taxi_data_raw',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW=TRUE,\n        FIELDTERMINATOR=',',\n        ROWTERMINATOR='\\n'\n    ) \n    AS [result]\n--------------------------------------------------------------------------------------------\nSELECT\n    count(*)\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_csv/year=2020/*/*.csv',\n        DATA_SOURCE='nyc_taxi_data_raw',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW=TRUE,\n        FIELDTERMINATOR=',',\n        ROWTERMINATOR='\\n'\n    ) \n    AS [result]\n--------------------------------------------------------------------------------------------\nSELECT\n    count(*)\nFROM\n    OPENROWSET(\n        BULK ('trip_data_green_csv/year=2020/month=01/*.csv' , 'trip_data_green_csv/year=2020/month=02/*.csv'),\n        DATA_SOURCE='nyc_taxi_data_raw',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW=TRUE,\n        FIELDTERMINATOR=',',\n        ROWTERMINATOR='\\n'\n    ) \n    AS [result]\n    --------------------------------------------------------------------------------------------\nSELECT\n    count(*)\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_csv/year=*/month=*/*.csv' ,\n        DATA_SOURCE='nyc_taxi_data_raw',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW=TRUE,\n        FIELDTERMINATOR=',',\n        ROWTERMINATOR='\\n'\n    ) \n    AS [result]\n--------------------------------------------------------------------------------------------\nSELECT\n    result.filename() as file_name, result.filepath() as file_path, count(1) as record_count\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_csv/year=*/month=*/*.csv' ,\n        DATA_SOURCE='nyc_taxi_data_raw',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW=TRUE,\n        FIELDTERMINATOR=',',\n        ROWTERMINATOR='\\n'\n    ) \n    AS [result]\n    group by result.filename(),result.filepath() \n    order by 1 \n    --------------------------------------------------------------------------------------------\nSELECT\n    result.filepath(1) as year,\n    result.filepath(2) as month, \n    count(1) as record_count\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_csv/year=*/month=*/*.csv' ,\n        DATA_SOURCE='nyc_taxi_data_raw',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW=TRUE,\n        FIELDTERMINATOR=',',\n        ROWTERMINATOR='\\n'\n    ) \n    AS [result]\n    group by result.filepath(1),result.filepath(2)\n    order by 1 \n--------------------------------------------------------------------------------------------\n    SELECT\n    result.filepath(1) as year,\n    result.filepath(2) as month, \n    count(1) as record_count\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_csv/year=*/month=*/*.csv' ,\n        DATA_SOURCE='nyc_taxi_data_raw',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW=TRUE,\n        FIELDTERMINATOR=',',\n        ROWTERMINATOR='\\n'\n    ) \n    AS [result]\n    where result.filepath(1)=2020 and result.filepath(2) in ('06','07','08')\n    group by result.filepath(1),result.filepath(2)\n    order by 1 \n\n--------------------------------------------------------------------------------------------\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "nyc_taxi_discovery",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/Query Taxi Zone')]",
 			"type": "Microsoft.Synapse/workspaces/sqlscripts",
 			"apiVersion": "2019-06-01-preview",
