@@ -1,0 +1,20 @@
+{
+	"name": "4_create_bronze_table",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/ldw"
+		},
+		"content": {
+			"query": "USE nyc_taxi_ldw\nGO\n\n-- create taxi_zone\nCREATE EXTERNAL TABLE bronze.taxi_zone\n(\n    LocationID SMALLINT,Borough VARCHAR(15),Zone VARCHAR(50),service_zone VARCHAR(15)\n)\nWITH (\n    LOCATION = 'raw/taxi_zone.csv',\n    DATA_SOURCE = nyc_taxi_src,  \n    FILE_FORMAT = csv_file_format\n)\nGO\n\n-- create calendar\nCREATE EXTERNAL TABLE bronze.calendar\n(\n    date_key INT,date DATE,year SMALLINT,month SMALLINT,day SMALLINT,\n        day_name varchar(20),day_of_year SMALLINT,week_of_month SMALLINT,\n        week_of_year SMALLINT,month_name VARCHAR(15),year_month INT,year_week INT\n)\nWITH (\n    LOCATION = 'raw/calendar.csv',\n    DATA_SOURCE = nyc_taxi_src,  \n    FILE_FORMAT = csv_file_format\n)\nGO\n\n-- create \nCREATE EXTERNAL TABLE bronze.taxi_zone\n(\n    LocationID SMALLINT,Borough VARCHAR(15),Zone VARCHAR(50),service_zone VARCHAR(15)\n)\nWITH (\n    LOCATION = 'raw/taxi_zone.csv',\n    DATA_SOURCE = nyc_taxi_src,  \n    FILE_FORMAT = csv_file_format\n)\nGO\n\n-- create \nCREATE EXTERNAL TABLE bronze.taxi_zone\n(\n    LocationID SMALLINT,Borough VARCHAR(15),Zone VARCHAR(50),service_zone VARCHAR(15)\n)\nWITH (\n    LOCATION = 'raw/taxi_zone.csv',\n    DATA_SOURCE = nyc_taxi_src,  \n    FILE_FORMAT = csv_file_format\n)\nGO\n\n-- create \nCREATE EXTERNAL TABLE bronze.taxi_zone\n(\n    LocationID SMALLINT,Borough VARCHAR(15),Zone VARCHAR(50),service_zone VARCHAR(15)\n)\nWITH (\n    LOCATION = 'raw/taxi_zone.csv',\n    DATA_SOURCE = nyc_taxi_src,  \n    FILE_FORMAT = csv_file_format\n)\nGO\n\n-- create \nCREATE EXTERNAL TABLE bronze.taxi_zone\n(\n    LocationID SMALLINT,Borough VARCHAR(15),Zone VARCHAR(50),service_zone VARCHAR(15)\n)\nWITH (\n    LOCATION = 'raw/taxi_zone.csv',\n    DATA_SOURCE = nyc_taxi_src,  \n    FILE_FORMAT = csv_file_format\n)\nGO\n\n\n-- query the table\nSELECT top 10 * FROM bronze.taxi_zone;",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_ldw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
