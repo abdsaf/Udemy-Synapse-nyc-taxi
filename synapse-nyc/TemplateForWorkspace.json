@@ -180,6 +180,29 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/1_usp_silver_trip_data_green')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "nyc_taxi/ldw/stored procedure"
+				},
+				"content": {
+					"query": "USE nyc_taxi_ldw\nGO\n\nCREATE or ALTER procedure silver.usp_silver_trip_data_green\n@year VARCHAR(4),@month varchar(2)\nAS\nBEGIN\nDECLARE @create_sql NVARCHAR(MAX),\n@drop_sql NVARCHAR(MAX);\n\nset @create_sql='CREATE EXTERNAL TABLE silver.trip_data_green_'+@year+'_'+@month+\n ' WITH (\n    LOCATION = ''silver/trip_data_green/year='+@year+'/month='+@month+''',\n    DATA_SOURCE = nyc_taxi_src,  \n    FILE_FORMAT = parquet_file_format\n \n)\nas \nselect * from bronze.vw_trip_data_green_csv where year='''+@year+''' and month='''+@month+'''';\n\nEXEC sp_executesql @create_sql;\n\nprint(@create_sql)\n\nset @drop_sql='drop EXTERNAL TABLE silver.trip_data_green_'+@year+'_'+@month;\n\nEXEC sp_executesql @drop_sql;\nEND;",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "nyc_taxi_ldw",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/2_create_external_data_sources')]",
 			"type": "Microsoft.Synapse/workspaces/sqlscripts",
 			"apiVersion": "2019-06-01-preview",
@@ -372,7 +395,7 @@
 					"name": "nyc_taxi/ldw"
 				},
 				"content": {
-					"query": "USE nyc_taxi_ldw\nGO\n\n--silver.taxi_zone\nIF object_id('silver.taxi_zone') is not NULL\n    drop EXTERNAL TABLE silver.taxi_zone\n\nCREATE EXTERNAL TABLE silver.taxi_zone\nWITH (\n    LOCATION = 'silver/taxi_zone',\n    DATA_SOURCE = nyc_taxi_src,  \n    FILE_FORMAT = parquet_file_format\n \n)\nas \nselect * from bronze.taxi_zone\n\n--silver.calendar\nIF object_id('silver.calendar') is not NULL\n    drop EXTERNAL TABLE silver.calendar\n\nCREATE EXTERNAL TABLE silver.calendar\n\nWITH (\n    LOCATION = 'silver/calendar',\n    DATA_SOURCE = nyc_taxi_src,  \n    FILE_FORMAT = parquet_file_format\n \n)\nas \nselect * from bronze.calendar\n\n\n--silver.vendor\nIF object_id('silver.vendor') is not NULL\n    drop EXTERNAL TABLE silver.vendor\n\nCREATE EXTERNAL TABLE silver.vendor\n\nWITH (\n    LOCATION = 'silver/vendor',\n    DATA_SOURCE = nyc_taxi_src,  \n    FILE_FORMAT = parquet_file_format\n \n)\nas \nselect * from bronze.vendor\n\n--silver.trip_type\nIF object_id('silver.trip_type') is not NULL\n    drop EXTERNAL TABLE silver.trip_type\n\nCREATE EXTERNAL TABLE silver.trip_type\n\nWITH (\n    LOCATION = 'silver/trip_type',\n    DATA_SOURCE = nyc_taxi_src,  \n    FILE_FORMAT = parquet_file_format\n \n)\nas \nselect * from bronze.trip_type\n\n--silver.rate_code \nIF object_id('silver.rate_code') is not NULL\n    drop EXTERNAL TABLE silver.rate_code\n\nCREATE EXTERNAL TABLE silver.rate_code\n\nWITH (\n    LOCATION = 'silver/rate_code',\n    DATA_SOURCE = nyc_taxi_src,  \n    FILE_FORMAT = parquet_file_format\n \n)\nas \nselect * from bronze.vw_rate_code \n\n--silver.payment_type \nIF object_id('silver.payment_type') is not NULL\n    drop EXTERNAL TABLE silver.payment_type\n\nCREATE EXTERNAL TABLE silver.payment_type\n\nWITH (\n    LOCATION = 'silver/payment_type',\n    DATA_SOURCE = nyc_taxi_src,  \n    FILE_FORMAT = parquet_file_format\n \n)\nas \nselect * from bronze.vw_payment_type",
+					"query": "USE nyc_taxi_ldw\nGO\n\n--silver.taxi_zone\nIF object_id('silver.taxi_zone') is not NULL\n    drop EXTERNAL TABLE silver.taxi_zone\n\nCREATE EXTERNAL TABLE silver.taxi_zone\nWITH (\n    LOCATION = 'silver/taxi_zone',\n    DATA_SOURCE = nyc_taxi_src,  \n    FILE_FORMAT = parquet_file_format\n \n)\nas \nselect * from bronze.taxi_zone\n\n--silver.calendar\nIF object_id('silver.calendar') is not NULL\n    drop EXTERNAL TABLE silver.calendar\n\nCREATE EXTERNAL TABLE silver.calendar\n\nWITH (\n    LOCATION = 'silver/calendar',\n    DATA_SOURCE = nyc_taxi_src,  \n    FILE_FORMAT = parquet_file_format\n \n)\nas \nselect * from bronze.calendar\n\n\n--silver.vendor\nIF object_id('silver.vendor') is not NULL\n    drop EXTERNAL TABLE silver.vendor\n\nCREATE EXTERNAL TABLE silver.vendor\n\nWITH (\n    LOCATION = 'silver/vendor',\n    DATA_SOURCE = nyc_taxi_src,  \n    FILE_FORMAT = parquet_file_format\n \n)\nas \nselect * from bronze.vendor\n\n--silver.trip_type\nIF object_id('silver.trip_type') is not NULL\n    drop EXTERNAL TABLE silver.trip_type\n\nCREATE EXTERNAL TABLE silver.trip_type\n\nWITH (\n    LOCATION = 'silver/trip_type',\n    DATA_SOURCE = nyc_taxi_src,  \n    FILE_FORMAT = parquet_file_format\n \n)\nas \nselect * from bronze.trip_type\n\n--silver.rate_code \nIF object_id('silver.rate_code') is not NULL\n    drop EXTERNAL TABLE silver.rate_code\n\nCREATE EXTERNAL TABLE silver.rate_code\n\nWITH (\n    LOCATION = 'silver/rate_code',\n    DATA_SOURCE = nyc_taxi_src,  \n    FILE_FORMAT = parquet_file_format\n \n)\nas \nselect * from bronze.vw_rate_code \n\n--silver.payment_type  trip_data_green_csv\nIF object_id('silver.payment_type') is not NULL\n    drop EXTERNAL TABLE silver.payment_type\n\nCREATE EXTERNAL TABLE silver.payment_type\n\nWITH (\n    LOCATION = 'silver/payment_type',\n    DATA_SOURCE = nyc_taxi_src,  \n    FILE_FORMAT = parquet_file_format\n \n)\nas \nselect * from bronze.vw_payment_type\n\n--trip data\nIF object_id('silver.trip_data_green') is not NULL\n    drop EXTERNAL TABLE silver.trip_data_green\n\nCREATE EXTERNAL TABLE silver.trip_data_green\n\nWITH (\n    LOCATION = 'silver/trip_data_green',\n    DATA_SOURCE = nyc_taxi_src,  \n    FILE_FORMAT = parquet_file_format\n \n)\nas \nselect * from bronze.trip_data_green_csv\n\n--trip data using stored procedure\nEXEC silver.usp_silver_trip_data_green '2020','01'\nEXEC silver.usp_silver_trip_data_green '2020','02'\nEXEC silver.usp_silver_trip_data_green '2020','03'\nEXEC silver.usp_silver_trip_data_green '2020','04'\nEXEC silver.usp_silver_trip_data_green '2020','05'\nEXEC silver.usp_silver_trip_data_green '2020','06'\nEXEC silver.usp_silver_trip_data_green '2020','07'\nEXEC silver.usp_silver_trip_data_green '2020','08'\nEXEC silver.usp_silver_trip_data_green '2020','09'\nEXEC silver.usp_silver_trip_data_green '2020','10'\nEXEC silver.usp_silver_trip_data_green '2020','11'\nEXEC silver.usp_silver_trip_data_green '2020','12'\n\nEXEC silver.usp_silver_trip_data_green '2021','01'\nEXEC silver.usp_silver_trip_data_green '2021','02'\nEXEC silver.usp_silver_trip_data_green '2021','03'\nEXEC silver.usp_silver_trip_data_green '2021','04'\nEXEC silver.usp_silver_trip_data_green '2021','05'\nEXEC silver.usp_silver_trip_data_green '2021','06'",
 					"metadata": {
 						"language": "sql"
 					},
@@ -401,6 +424,29 @@
 					},
 					"currentConnection": {
 						"databaseName": "nyc_taxi_discovery",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/7_create_silver_view')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "nyc_taxi/ldw"
+				},
+				"content": {
+					"query": "USE nyc_taxi_ldw\nGO\n\n\nDROP VIEW if EXISTS silver.vw_trip_data_green\nGO\n\nCREATE view silver.vw_trip_data_green\nas \nSELECT\n    result.filepath(1) as year,\n    result.filepath(2) as month, \n    result.*\nFROM\n    OPENROWSET(\n    BULK  'silver/trip_data_green/year=*/month=*/*.parquet',\n    DATA_SOURCE = 'nyc_taxi_src',  \n    FORMAT = 'parquet'\n    ) \n    with \n    (\n        VendorID INT,lpep_pickup_datetime DATETIME2(7),lpep_dropoff_datetime DATETIME2(7),\n    store_and_fwd_flag CHAR(1),RatecodeID INT,PULocationID SMALLINT,DOLocationID SMALLINT,\n    passenger_count INT,trip_distance FLOAT,fare_amount FLOAT,extra FLOAT ,mta_tax Float,\n    tip_amount Float,tolls_amount Float,ehail_fee Float,improvement_surcharge Float,total_amount Float,\n    payment_type SMALLINT,trip_type SMALLINT,congestion_surcharge Float\n    )\n    AS [result]\nGO \n\nselect top 100 * from silver.vw_trip_data_green",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "nyc_taxi_ldw",
 						"poolName": "Built-in"
 					},
 					"resultLimit": 5000
