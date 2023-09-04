@@ -326,7 +326,7 @@
 					"name": "nyc_taxi/ldw"
 				},
 				"content": {
-					"query": "USE nyc_taxi_ldw;\n\nCREATE view bronze.vw_rate_code \nas \nselect rate_code_id,rate_code\nFROM\n    OPENROWSET(\n        BULK '/raw/rate_code.json',\n        DATA_SOURCE='nyc_taxi_src',\n        FORMAT = 'CSV',\n        FIELDTERMINATOR ='0x0b', \n        FIELDQUOTE = '0x0b',\n        ROWTERMINATOR='0x0b'\n    ) \n    with (jsondoc NVARCHAR(MAX)) AS [result] \n    CROSS APPLY OPENJSON(jsondoc)\n    with (rate_code_id TINYINT,rate_code VARCHAR(25) );\n\n    select top 10 * from bronze.vw_rate_code\n",
+					"query": "USE nyc_taxi_ldw\nGO\n\nDROP VIEW if EXISTS bronze.vw_rate_code\nGO\n\nCREATE view bronze.vw_rate_code \nas \nselect rate_code_id,rate_code\nFROM\n    OPENROWSET(\n        BULK '/raw/rate_code.json',\n        DATA_SOURCE='nyc_taxi_src',\n        FORMAT = 'CSV',\n        FIELDTERMINATOR ='0x0b', \n        FIELDQUOTE = '0x0b',\n        ROWTERMINATOR='0x0b'\n    ) \n    with (jsondoc NVARCHAR(MAX)) AS [result] \n    CROSS APPLY OPENJSON(jsondoc)\n    with (rate_code_id TINYINT,rate_code VARCHAR(25) )\nGo   \n\n--------------------------------------------------------------------------------------------------------------\n\nDROP VIEW if EXISTS bronze.vw_payment_type\nGO\n\nCREATE view bronze.vw_payment_type \nas \nselect payment_type,derscription\nFROM\n    OPENROWSET(\n        BULK '/raw/payment_type.json',\n        DATA_SOURCE='nyc_taxi_src',\n        FORMAT = 'CSV',\n        FIELDTERMINATOR ='0x0b', \n        FIELDQUOTE = '0x0b'\n    ) \n    with (jsondoc NVARCHAR(MAX)) AS [result] \n    CROSS APPLY OPENJSON(jsondoc)\n    with (payment_type TINYINT,derscription VARCHAR(25) '$.payment_type_desc')\nGo  \n\n\n\n\n",
 					"metadata": {
 						"language": "sql"
 					},
