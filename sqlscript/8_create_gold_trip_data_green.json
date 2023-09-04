@@ -1,0 +1,20 @@
+{
+	"name": "8_create_gold_trip_data_green",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/ldw"
+		},
+		"content": {
+			"query": "use nyc_taxi_ldw\nGO\n\nselect td.year,td.month,convert(DATE,td.lpep_pickup_datetime) as trip_date,tz.Borough,cal.day_name as trip_day,\ncase when cal.day_name in ('Saturday','Sunday') then 'Y' else 'N' end as trip_day_weekend_ind ,\nsum(case when pt.derscription='Credit card' then 1 else 0 end) as card_trip_count,\nsum(case when pt.derscription='Cash' then 1 else 0 end) as cash_trip_count\nfrom silver.vw_trip_data_green td \njoin silver.taxi_zone tz on tz.LocationID=td.PULocationID\njoin silver.calendar cal on cal.date=convert(DATE,td.lpep_pickup_datetime)\njoin silver.payment_type pt on pt.payment_type=td.payment_type\nWHERE td.year='2020' AND td.month='01'\ngroup by td.year,td.month,convert(DATE,td.lpep_pickup_datetime),tz.Borough,cal.day_name ,\ncase when cal.day_name in ('Saturday','Sunday') then 'Y' else 'N' end",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_ldw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
