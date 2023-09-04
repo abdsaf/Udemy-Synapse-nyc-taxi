@@ -1,0 +1,20 @@
+{
+	"name": "7_create_silver_view",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/ldw"
+		},
+		"content": {
+			"query": "USE nyc_taxi_ldw\nGO\n\n\nDROP VIEW if EXISTS silver.vw_trip_data_green\nGO\n\nCREATE view silver.vw_trip_data_green\nas \nSELECT\n    result.filepath(1) as year,\n    result.filepath(2) as month, \n    result.*\nFROM\n    OPENROWSET(\n    BULK  'silver/trip_data_green/year=*/month=*/*.parquet',\n    DATA_SOURCE = 'nyc_taxi_src',  \n    FORMAT = 'parquet'\n    ) \n    with \n    (\n        VendorID INT,lpep_pickup_datetime DATETIME2(7),lpep_dropoff_datetime DATETIME2(7),\n    store_and_fwd_flag CHAR(1),RatecodeID INT,PULocationID SMALLINT,DOLocationID SMALLINT,\n    passenger_count INT,trip_distance FLOAT,fare_amount FLOAT,extra FLOAT ,mta_tax Float,\n    tip_amount Float,tolls_amount Float,ehail_fee Float,improvement_surcharge Float,total_amount Float,\n    payment_type SMALLINT,trip_type SMALLINT,congestion_surcharge Float\n    )\n    AS [result]\nGO \n\nselect top 100 * from silver.vw_trip_data_green",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_ldw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
