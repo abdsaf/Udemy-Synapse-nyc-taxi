@@ -2,7 +2,7 @@
 	"name": "SQL script 1",
 	"properties": {
 		"content": {
-			"query": "SELECT TOP (100) [VendorID]\n,[lpep_pickup_datetime]\n,[lpep_dropoff_datetime]\n,[store_and_fwd_flag]\n,[RatecodeID]\n,[PULocationID]\n,[DOLocationID]\n,[passenger_count]\n,[trip_distance]\n,[fare_amount]\n,[extra]\n,[mta_tax]\n,[tip_amount]\n,[tolls_amount]\n,[ehail_fee]\n,[improvement_surcharge]\n,[total_amount]\n,[payment_type]\n,[trip_type]\n,[congestion_surcharge]\n FROM [bronze].[trip_data_green_csv]\n ",
+			"query": "SELECT TOP (100) [VendorID]\n,[lpep_pickup_datetime]\n,[lpep_dropoff_datetime]\n,[store_and_fwd_flag]\n,[RatecodeID]\n,[PULocationID]\n,[DOLocationID]\n,[passenger_count]\n,[trip_distance]\n,[fare_amount]\n,[extra]\n,[mta_tax]\n,[tip_amount]\n,[tolls_amount]\n,[ehail_fee]\n,[improvement_surcharge]\n,[total_amount]\n,[payment_type]\n,[trip_type]\n,[congestion_surcharge]\n FROM [bronze].[trip_data_green_csv]\n where [ehail_fee] is not null",
 			"metadata": {
 				"language": "sql"
 			},
