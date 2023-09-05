@@ -5,6 +5,9 @@
 		"workspaceName": {
 			"value": "synapse-nyc"
 		},
+		"ls_serveless_sql_pool_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=synapse-nyc-ondemand.sql.azuresynapse.net;Initial Catalog=nyc_taxi_ldw"
+		},
 		"synapse-nyc-WorkspaceDefaultSqlServer_connectionString": {
 			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:synapse-nyc.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
 		},
