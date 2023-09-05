@@ -19,19 +19,49 @@
 						"referenceName": "ds_silver_taxi_zone",
 						"type": "DatasetReference"
 					},
-					"logStorageSettings": {
-						"linkedServiceName": {
-							"referenceName": "ln_ADLS",
-							"type": "LinkedServiceReference"
-						},
-						"path": ""
-					},
-					"enableLogging": true,
+					"enableLogging": false,
 					"storeSettings": {
 						"type": "AzureBlobFSReadSettings",
 						"recursive": true,
 						"enablePartitionDiscovery": false
 					}
+				}
+			},
+			{
+				"name": "create silver taxi zone",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "Delete Taxi zone silver file",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "ls_serveless_sql_pool",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "NonQuery",
+							"text": "IF object_id('silver.taxi_zone') is not NULL\n    drop EXTERNAL TABLE silver.taxi_zone"
+						},
+						{
+							"type": "NonQuery",
+							"text": "CREATE EXTERNAL TABLE silver.taxi_zone\nWITH (\n    LOCATION = 'silver/taxi_zone',\n    DATA_SOURCE = nyc_taxi_src,  \n    FILE_FORMAT = parquet_file_format\n \n)\nas \nselect * from bronze.taxi_zone"
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
 				}
 			}
 		],
