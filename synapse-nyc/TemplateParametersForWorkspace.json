@@ -11,6 +11,9 @@
 		"bing-covid-19-data_sasUri": {
 			"value": ""
 		},
+		"ln_ADLS_properties_typeProperties_url": {
+			"value": "https://synapseadlk.dfs.core.windows.net/"
+		},
 		"synapse-nyc-WorkspaceDefaultStorage_properties_typeProperties_url": {
 			"value": "https://synapseadlk.dfs.core.windows.net"
 		}
