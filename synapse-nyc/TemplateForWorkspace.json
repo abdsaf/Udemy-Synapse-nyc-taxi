@@ -35,62 +35,84 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('workspaceName'), '/pl_create_silver_taxi_zone')]",
+			"name": "[concat(parameters('workspaceName'), '/pl_create_silver_tables')]",
 			"type": "Microsoft.Synapse/workspaces/pipelines",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"activities": [
 					{
-						"name": "Delete Taxi zone silver file",
-						"type": "Delete",
+						"name": "ForEach folder path",
+						"type": "ForEach",
 						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
 						"userProperties": [],
 						"typeProperties": {
-							"dataset": {
-								"referenceName": "ds_silver_taxi_zone",
-								"type": "DatasetReference",
-								"parameters": {}
+							"items": {
+								"value": "@variables('v_folder_path_usp_name')",
+								"type": "Expression"
 							},
-							"enableLogging": false,
-							"storeSettings": {
-								"type": "AzureBlobFSReadSettings",
-								"recursive": true,
-								"enablePartitionDiscovery": false
-							}
-						}
-					},
-					{
-						"name": "usp_silver_taxi_zone",
-						"type": "SqlServerStoredProcedure",
-						"dependsOn": [
-							{
-								"activity": "Delete Taxi zone silver file",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"storedProcedureName": "[silver].[usp_silver_taxi_zone]"
-						},
-						"linkedServiceName": {
-							"referenceName": "ls_serveless_sql_pool",
-							"type": "LinkedServiceReference"
+							"activities": [
+								{
+									"name": "Delete silver folder",
+									"type": "Delete",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "ds_nyc_taxi_dynamic",
+											"type": "DatasetReference",
+											"parameters": {
+												"p_folder_path": {
+													"value": "@item().folder_path",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableLogging": false,
+										"storeSettings": {
+											"type": "AzureBlobFSReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										}
+									}
+								},
+								{
+									"name": "usp_silver_table",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [
+										{
+											"activity": "Delete silver folder",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": {
+											"value": "@item().usp_name",
+											"type": "Expression"
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "ls_serveless_sql_pool",
+										"type": "LinkedServiceReference"
+									}
+								}
+							]
 						}
 					}
 				],
@@ -98,79 +120,64 @@
 					"elapsedTimeMetric": {},
 					"cancelAfter": {}
 				},
+				"variables": {
+					"v_folder_path_usp_name": {
+						"type": "Array",
+						"defaultValue": [
+							{
+								"folder_path": "silver/taxi_zone",
+								"usp_name": "silver.usp_silver_taxi_zone"
+							},
+							{
+								"folder_path": "silver/calendar",
+								"usp_name": "silver.usp_silver_calendar"
+							},
+							{
+								"folder_path": "silver/trip_type",
+								"usp_name": "silver.usp_silver_trip_type"
+							},
+							{
+								"folder_path": "silver/vendor",
+								"usp_name": "silver.usp_silver_vendor"
+							}
+						]
+					}
+				},
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('workspaceId'), '/datasets/ds_silver_taxi_zone')]",
+				"[concat(variables('workspaceId'), '/datasets/ds_nyc_taxi_dynamic')]",
 				"[concat(variables('workspaceId'), '/linkedServices/ls_serveless_sql_pool')]"
 			]
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/ds_silver_taxi_zone')]",
+			"name": "[concat(parameters('workspaceName'), '/ds_nyc_taxi_dynamic')]",
 			"type": "Microsoft.Synapse/workspaces/datasets",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"linkedServiceName": {
 					"referenceName": "ln_ADLS",
 					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"p_folder_path": {
+						"type": "string"
+					}
 				},
 				"annotations": [],
 				"type": "Parquet",
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"folderPath": "silver/taxi_zone",
+						"folderPath": {
+							"value": "@dataset().p_folder_path",
+							"type": "Expression"
+						},
 						"fileSystem": "nyc-taxi-data"
 					},
 					"compressionCodec": "snappy"
 				},
 				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/linkedServices/ln_ADLS')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/ds_taxi_zone')]",
-			"type": "Microsoft.Synapse/workspaces/datasets",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "ln_ADLS",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": "taxi_zone.csv",
-						"folderPath": "raw",
-						"fileSystem": "nyc-taxi-data"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": [
-					{
-						"name": "LocationID",
-						"type": "String"
-					},
-					{
-						"name": "Borough",
-						"type": "String"
-					},
-					{
-						"name": "Zone",
-						"type": "String"
-					},
-					{
-						"name": "service_zone",
-						"type": "String"
-					}
-				]
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/linkedServices/ln_ADLS')]"
@@ -515,7 +522,7 @@
 					"name": "nyc_taxi/ldw/stored procedure"
 				},
 				"content": {
-					"query": "USE nyc_taxi_ldw\nGO\n\nCREATE or ALTER procedure silver.usp_silver_taxi_zone\nAS\nBEGIN\n--silver.taxi_zone\nIF object_id('silver.taxi_zone') is not NULL\n    drop EXTERNAL TABLE silver.taxi_zone\n\nCREATE EXTERNAL TABLE silver.taxi_zone\nWITH (\n    LOCATION = 'silver/taxi_zone',\n    DATA_SOURCE = nyc_taxi_src,  \n    FILE_FORMAT = parquet_file_format\n \n)\nas \nselect * from bronze.taxi_zone\n\nEND",
+					"query": "USE nyc_taxi_ldw\nGO\n\nCREATE or ALTER procedure silver.usp_silver_taxi_zone\nAS\nBEGIN\n--silver.taxi_zone\nIF object_id('silver.taxi_zone') is not NULL\n    drop EXTERNAL TABLE silver.taxi_zone\n\nCREATE EXTERNAL TABLE silver.taxi_zone\nWITH (\n    LOCATION = 'silver/taxi_zone',\n    DATA_SOURCE = nyc_taxi_src,  \n    FILE_FORMAT = parquet_file_format\n \n)\nas \nselect * from bronze.taxi_zone\n\nEND\nGO\n\nCREATE or ALTER procedure silver.usp_silver_calendar\nAS\nBEGIN\n--silver.taxi_zone\nIF object_id('silver.calendar') is not NULL\n    drop EXTERNAL TABLE silver.calendar\n\nCREATE EXTERNAL TABLE silver.calendar\nWITH (\n    LOCATION = 'silver/calendar',\n    DATA_SOURCE = nyc_taxi_src,  \n    FILE_FORMAT = parquet_file_format\n \n)\nas \nselect * from bronze.calendar\n\nEND\nGO\n\nCREATE or ALTER procedure silver.usp_silver_trip_type\nAS\nBEGIN\n--silver.taxi_zone\nIF object_id('silver.trip_type') is not NULL\n    drop EXTERNAL TABLE silver.trip_type\n\nCREATE EXTERNAL TABLE silver.trip_type\nWITH (\n    LOCATION = 'silver/trip_type',\n    DATA_SOURCE = nyc_taxi_src,  \n    FILE_FORMAT = parquet_file_format\n \n)\nas \nselect * from bronze.trip_type\n\nEND\nGO\n\nCREATE or ALTER procedure silver.usp_silver_vendor\nAS\nBEGIN\n--silver.taxi_zone\nIF object_id('silver.vendor') is not NULL\n    drop EXTERNAL TABLE silver.vendor\n\nCREATE EXTERNAL TABLE silver.vendor\nWITH (\n    LOCATION = 'silver/vendor',\n    DATA_SOURCE = nyc_taxi_src,  \n    FILE_FORMAT = parquet_file_format\n \n)\nas \nselect * from bronze.vendor\n\nEND\nGO\n\nCREATE or ALTER procedure silver.usp_silver_rate_code\nAS\nBEGIN\n--silver.taxi_zone\nIF object_id('silver.rate_code') is not NULL\n    drop EXTERNAL TABLE silver.rate_code\n\nCREATE EXTERNAL TABLE silver.rate_code\nWITH (\n    LOCATION = 'silver/rate_code',\n    DATA_SOURCE = nyc_taxi_src,  \n    FILE_FORMAT = parquet_file_format\n \n)\nas \nselect * from bronze.rate_code\n\nEND\nGO\n\nCREATE or ALTER procedure silver.usp_silver_payment_type\nAS\nBEGIN\n--silver.taxi_zone\nIF object_id('silver.payment_type') is not NULL\n    drop EXTERNAL TABLE silver.payment_type\n\nCREATE EXTERNAL TABLE silver.payment_type\nWITH (\n    LOCATION = 'silver/payment_type',\n    DATA_SOURCE = nyc_taxi_src,  \n    FILE_FORMAT = parquet_file_format\n \n)\nas \nselect * from bronze.payment_type\n\nEND",
 					"metadata": {
 						"language": "sql"
 					},
