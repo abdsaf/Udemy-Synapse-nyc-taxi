@@ -1,0 +1,20 @@
+{
+	"name": "ds_taxi_zone_silver",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ln_ADLS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "silver",
+				"fileSystem": "nyc-taxi-data"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	}
+}
