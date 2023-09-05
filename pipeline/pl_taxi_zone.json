@@ -82,6 +82,13 @@
 						"referenceName": "ds_taxi_zone_silver",
 						"type": "DatasetReference"
 					},
+					"logStorageSettings": {
+						"linkedServiceName": {
+							"referenceName": "ln_ADLS",
+							"type": "LinkedServiceReference"
+						},
+						"path": ""
+					},
 					"enableLogging": true,
 					"storeSettings": {
 						"type": "AzureBlobFSReadSettings",
