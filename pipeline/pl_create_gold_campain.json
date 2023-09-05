@@ -1,0 +1,167 @@
+{
+	"name": "pl_create_gold_campain",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get year month",
+				"type": "Script",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "ls_serveless_sql_pool",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": "SELECT distinct t.year,t.month from silver.vw_trip_data_green t"
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			},
+			{
+				"name": "create silver trip data partition",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get year month",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get year month').output.resultSets[0].rows",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "usp_gold_green_data",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Delete partition",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[gold].[usp_gold_trip_data_green]",
+								"storedProcedureParameters": {
+									"month": {
+										"value": {
+											"value": "@item().month",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"year": {
+										"value": {
+											"value": "@item().year",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "ls_serveless_sql_pool",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Delete partition",
+							"type": "Delete",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "ds_nyc_taxi_dynamic",
+									"type": "DatasetReference",
+									"parameters": {
+										"p_folder_path": {
+											"value": "gold/trip_data_green/year=@{item().year}/month=@{item().month}",
+											"type": "Expression"
+										}
+									}
+								},
+								"enableLogging": false,
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "create silver trip_data _green view",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "create silver trip data partition",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "ls_serveless_sql_pool",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "NonQuery",
+							"text": "DROP VIEW if EXISTS gold.vw_trip_data_green\n"
+						},
+						{
+							"type": "Query",
+							"text": "CREATE view gold.vw_trip_data_green\nas \nSELECT\n    result.filepath(1) as year,\n    result.filepath(2) as month, \n    result.*\nFROM\n    OPENROWSET(\n    BULK  'gold/trip_data_green/year=*/month=*/*.parquet',\n    DATA_SOURCE = 'nyc_taxi_src',  \n    FORMAT = 'parquet'\n    ) \n    with \n    (\n       trip_date DATE,Borough VARCHAR(25),trip_day VARCHAR(25),trip_day_weekend_ind VARCHAR(1),\n       card_trip_count INT,cash_trip_count INT\n    )\n    AS [result]\n"
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			}
+		],
+		"annotations": []
+	}
+}
