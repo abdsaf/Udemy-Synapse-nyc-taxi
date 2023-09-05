@@ -28,8 +28,8 @@
 				}
 			},
 			{
-				"name": "create silver taxi zone",
-				"type": "Script",
+				"name": "usp_silver_taxi_zone",
+				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
 						"activity": "Delete Taxi zone silver file",
@@ -46,22 +46,12 @@
 					"secureInput": false
 				},
 				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[silver].[usp_silver_taxi_zone]"
+				},
 				"linkedServiceName": {
 					"referenceName": "ls_serveless_sql_pool",
 					"type": "LinkedServiceReference"
-				},
-				"typeProperties": {
-					"scripts": [
-						{
-							"type": "NonQuery",
-							"text": "IF object_id('silver.taxi_zone') is not NULL\n    drop EXTERNAL TABLE silver.taxi_zone"
-						},
-						{
-							"type": "NonQuery",
-							"text": "CREATE EXTERNAL TABLE silver.taxi_zone\nWITH (\n    LOCATION = 'silver/taxi_zone',\n    DATA_SOURCE = nyc_taxi_src,  \n    FILE_FORMAT = parquet_file_format\n \n)\nas \nselect * from bronze.taxi_zone"
-						}
-					],
-					"scriptBlockExecutionTimeout": "02:00:00"
 				}
 			}
 		],

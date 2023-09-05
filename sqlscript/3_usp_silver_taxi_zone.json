@@ -1,0 +1,20 @@
+{
+	"name": "3_usp_silver_taxi_zone",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/ldw/stored procedure"
+		},
+		"content": {
+			"query": "USE nyc_taxi_ldw\nGO\n\nCREATE or ALTER procedure silver.usp_silver_taxi_zone\nAS\nBEGIN\n--silver.taxi_zone\nIF object_id('silver.taxi_zone') is not NULL\n    drop EXTERNAL TABLE silver.taxi_zone\n\nCREATE EXTERNAL TABLE silver.taxi_zone\nWITH (\n    LOCATION = 'silver/taxi_zone',\n    DATA_SOURCE = nyc_taxi_src,  \n    FILE_FORMAT = parquet_file_format\n \n)\nas \nselect * from bronze.taxi_zone\n\nEND",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_ldw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
