@@ -163,7 +163,7 @@
 						}
 					},
 					{
-						"name": "create silver trip_data _green view",
+						"name": "create gold  view",
 						"type": "Script",
 						"dependsOn": [
 							{
