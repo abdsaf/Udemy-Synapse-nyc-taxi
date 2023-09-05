@@ -16,9 +16,12 @@
 			"recurrence": {
 				"frequency": "Day",
 				"interval": 1,
-				"startTime": "2023-09-05T13:57:00",
+				"startTime": "2023-09-04T13:57:00",
 				"timeZone": "W. Europe Standard Time",
 				"schedule": {
+					"minutes": [
+						20
+					],
 					"hours": [
 						16
 					]
