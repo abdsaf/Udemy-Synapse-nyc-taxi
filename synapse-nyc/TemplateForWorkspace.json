@@ -505,6 +505,80 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/pl_master_pipeline')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute pl_silver_table",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "pl_create_silver_tables",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Execute pl_silver_green_data",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "pl_create_silver_trip_data_green",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Execute pl_gold",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute pl_silver_table",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Execute pl_silver_green_data",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "pl_create_gold_campain",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/pl_create_silver_tables')]",
+				"[concat(variables('workspaceId'), '/pipelines/pl_create_silver_trip_data_green')]",
+				"[concat(variables('workspaceId'), '/pipelines/pl_create_gold_campain')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/ds_nyc_taxi_dynamic')]",
 			"type": "Microsoft.Synapse/workspaces/datasets",
 			"apiVersion": "2019-06-01-preview",
