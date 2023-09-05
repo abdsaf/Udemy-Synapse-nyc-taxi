@@ -3,14 +3,18 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "ForEach1",
+				"name": "ForEach folder path",
 				"type": "ForEach",
 				"dependsOn": [],
 				"userProperties": [],
 				"typeProperties": {
+					"items": {
+						"value": "@variables('v_folder_path_usp_name')",
+						"type": "Expression"
+					},
 					"activities": [
 						{
-							"name": "Delete Taxi zone silver file",
+							"name": "Delete silver folder",
 							"type": "Delete",
 							"dependsOn": [],
 							"policy": {
@@ -27,7 +31,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"p_folder_path": {
-											"value": "@pipeline().parameters.FolderName",
+											"value": "@item().folder_path",
 											"type": "Expression"
 										}
 									}
@@ -41,11 +45,11 @@
 							}
 						},
 						{
-							"name": "usp_silver_taxi_zone",
+							"name": "usp_silver_table",
 							"type": "SqlServerStoredProcedure",
 							"dependsOn": [
 								{
-									"activity": "Delete Taxi zone silver file",
+									"activity": "Delete silver folder",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -61,7 +65,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"storedProcedureName": {
-									"value": "@pipeline().parameters.usp_name",
+									"value": "@item().usp_name",
 									"type": "Expression"
 								}
 							},
@@ -74,14 +78,6 @@
 				}
 			}
 		],
-		"parameters": {
-			"usp_name": {
-				"type": "string"
-			},
-			"pl_folder_path": {
-				"type": "string"
-			}
-		},
 		"variables": {
 			"v_folder_path_usp_name": {
 				"type": "Array",
@@ -101,14 +97,6 @@
 					{
 						"folder_path": "silver/vendor",
 						"usp_name": "silver.usp_silver_vendor"
-					},
-					{
-						"folder_path": "silver/rate_code",
-						"usp_name": "silver.usp_silver_rate_code"
-					},
-					{
-						"folder_path": "silver/payment_type",
-						"usp_name": "silver.usp_silver_payment_type"
 					}
 				]
 			}
