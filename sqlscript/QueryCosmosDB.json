@@ -1,5 +1,5 @@
 {
-	"name": "SQL script 2",
+	"name": "QueryCosmosDB",
 	"properties": {
 		"content": {
 			"query": "IF (NOT EXISTS(SELECT * FROM sys.credentials WHERE name = 'synapsecosmosomar'))\n    CREATE CREDENTIAL [synapsecosmosomar]\n    WITH IDENTITY = 'SHARED ACCESS SIGNATURE', SECRET = 'U3ebmzWrU0NOL5nuM9ru7nH0NiOmVcxDoR6dmKbklRavhv2gE5kqUjFnfQqL65YwFlm5Vjar81jwACDbFvvWfA=='\nGO\n\nSELECT TOP 100 *\nFROM OPENROWSET(​PROVIDER = 'CosmosDB',\n                CONNECTION = 'Account=synapsecosmosomar;Database=nyctaxidb',\n                OBJECT = 'Heartbeat',\n                SERVER_CREDENTIAL = 'synapsecosmosomar'\n) AS [Heartbeat]\n",
