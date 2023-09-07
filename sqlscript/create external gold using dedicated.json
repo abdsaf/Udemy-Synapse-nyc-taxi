@@ -1,6 +1,9 @@
 {
 	"name": "create external gold using dedicated",
 	"properties": {
+		"folder": {
+			"name": "dwh"
+		},
 		"content": {
 			"query": "create schema staging\nGO\n\nIF NOT EXISTS (SELECT * FROM sys.external_file_formats WHERE name = 'SynapseParquetFormat') \n\tCREATE EXTERNAL FILE FORMAT [SynapseParquetFormat] \n\tWITH ( FORMAT_TYPE = PARQUET)\nGO\n\nIF NOT EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'nyc-taxi-data_src') \n\tCREATE EXTERNAL DATA SOURCE [nyc-taxi-data_src] \n\tWITH (\n\t\tLOCATION = 'abfss://nyc-taxi-data@synapseadlk.dfs.core.windows.net' \n\t)\nGO\n\nCREATE EXTERNAL TABLE staging.ext_trp_data_green_agg (\n\t[PULocationID] smallint,\n\t[DOLocationID] smallint,\n\t[total_trip_count] bigint,\n\t[total_fare_amount] float\n\t)\n\tWITH (\n\tLOCATION = 'gold/trip_data_green_agg',\n\tDATA_SOURCE = [nyc-taxi-data_src],\n\tFILE_FORMAT = [SynapseParquetFormat]\n\t)\nGO\n\n\nSELECT TOP 100 * FROM staging.ext_trp_data_green_agg\nGO",
 			"metadata": {
