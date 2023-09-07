@@ -1,0 +1,17 @@
+{
+	"name": "create dwh table using CETAS",
+	"properties": {
+		"content": {
+			"query": "create schema dwh\nGO\n\ncreate table dwh.trip_data_green_agg \nWITH\n(\n   CLUSTERED COLUMNSTORE INDEX,\n   DISTRIBUTION = ROUND_ROBIN \n)\nas SELECT *\n FROM [staging].[ext_trp_data_green_agg]",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxt_dwh",
+				"poolName": "nyc_taxt_dwh"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
