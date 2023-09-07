@@ -7,6 +7,10 @@
 			"metadata": "Workspace name",
 			"defaultValue": "synapse-nyc"
 		},
+		"ls_CosmosDb_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ls_CosmosDb'"
+		},
 		"ls_serveless_sql_pool_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'ls_serveless_sql_pool'",
@@ -34,15 +38,6 @@
 		"workspaceId": "[concat('Microsoft.Synapse/workspaces/', parameters('workspaceName'))]"
 	},
 	"resources": [
-		{
-			"name": "[concat(parameters('workspaceName'), '/nyctaxispark')]",
-			"type": "Microsoft.Synapse/workspaces/bigDataPools",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": []
-			},
-			"dependsOn": []
-		},
 		{
 			"name": "[concat(parameters('workspaceName'), '/pl_create_gold_campain')]",
 			"type": "Microsoft.Synapse/workspaces/pipelines",
@@ -642,6 +637,25 @@
 				"type": "AzureBlobFS",
 				"typeProperties": {
 					"url": "[parameters('ln_ADLS_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ls_CosmosDb')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "CosmosDb",
+				"typeProperties": {
+					"connectionString": "[parameters('ls_CosmosDb_connectionString')]"
 				},
 				"connectVia": {
 					"referenceName": "AutoResolveIntegrationRuntime",
@@ -1311,6 +1325,26 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/QueryCosmosDB')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "IF (NOT EXISTS(SELECT * FROM sys.credentials WHERE name = 'synapsecosmosomar'))\n    CREATE CREDENTIAL [synapsecosmosomar]\n    WITH IDENTITY = 'SHARED ACCESS SIGNATURE', SECRET = 'U3ebmzWrU0NOL5nuM9ru7nH0NiOmVcxDoR6dmKbklRavhv2gE5kqUjFnfQqL65YwFlm5Vjar81jwACDbFvvWfA=='\nGO\n\nSELECT TOP 100 *\nFROM OPENROWSET(​PROVIDER = 'CosmosDB',\n                CONNECTION = 'Account=synapsecosmosomar;Database=nyctaxidb',\n                OBJECT = 'Heartbeat',\n                SERVER_CREDENTIAL = 'synapsecosmosomar'\n) AS [Heartbeat]\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/1_spark_create_gold_trip_data_green_agg')]",
 			"type": "Microsoft.Synapse/workspaces/notebooks",
 			"apiVersion": "2019-06-01-preview",
@@ -1331,7 +1365,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "71fb9ca9-6eba-4e7d-ac4a-28dd80a13a6b"
+						"spark.autotune.trackingId": "885f3e79-4a6c-4f4d-a970-0436f6e46f66"
 					}
 				},
 				"metadata": {
@@ -1356,8 +1390,7 @@
 						"sparkVersion": "3.3",
 						"nodeCount": 3,
 						"cores": 4,
-						"memory": 28,
-						"automaticScaleJobs": false
+						"memory": 28
 					},
 					"sessionKeepAliveTimeout": 10
 				},

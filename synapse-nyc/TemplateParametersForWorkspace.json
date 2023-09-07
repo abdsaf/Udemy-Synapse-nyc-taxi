@@ -5,6 +5,9 @@
 		"workspaceName": {
 			"value": "synapse-nyc"
 		},
+		"ls_CosmosDb_connectionString": {
+			"value": ""
+		},
 		"ls_serveless_sql_pool_connectionString": {
 			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=synapse-nyc-ondemand.sql.azuresynapse.net;Initial Catalog=nyc_taxi_ldw"
 		},
